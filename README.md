@@ -8,3 +8,8 @@ virtualenv env
 ```
 pip install -r requirements.txt
 ```
+
+> Para el caso de añadir mas dependencias ejecuta el comando
+```
+pip freeze > requirements.txt
+```
