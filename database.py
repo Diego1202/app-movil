@@ -14,9 +14,6 @@ def create_db():
     conn.commit()
     conn.close()
 
-if __name__ == '__main__':
-    create_db()
-    print("Base de datos inicializada con éxito.")
 
 import sqlite3
 
