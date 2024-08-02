@@ -1,2 +1,6 @@
 ## Comando para instalar las dependencias 
-"""bash
+> [!NOTE]
+> En la terminal ejecuta
+> ```
+pip install -r requirements.txt
+```
