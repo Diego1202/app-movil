@@ -6,13 +6,12 @@ from register import RegisterScreen
 
 class MyApp(App):
     def build(self):
-
+        create_db()
         sm = ScreenManager()
         sm.add_widget(RegisterScreen(name='register'))
         return sm
 
 if __name__ == '__main__':
-    create_db()
     MyApp().run()
     
     
