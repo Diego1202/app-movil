@@ -14,15 +14,16 @@ class RegisterScreen(Screen):
     def __init__(self, **kwargs):
         super(RegisterScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical')
-        
+        print("R E G I S T R O")
         self.username = TextInput(hint_text='Username', multiline=False)
         self.password = TextInput(hint_text='Password', multiline=False, password=True)
 
         # Initialize camera
         self.camera = Camera(play=True, resolution=(640, 480))
+        home_button = Button(text='Regresar', on_release=self.go_to_home)
         self.capture_button = Button(text='Capture Face', on_release=self.capture_face)
         register_button = Button(text='Create Account', on_release=self.register)
-        back_button = Button(text='Back to Login', on_release=self.go_to_login)
+        login_button = Button(text='Back to Login', on_release=self.go_to_login)
 
         layout.add_widget(Label(text='Register your user'))
         layout.add_widget(self.username)
@@ -30,7 +31,8 @@ class RegisterScreen(Screen):
         layout.add_widget(self.camera)
         layout.add_widget(self.capture_button)
         layout.add_widget(register_button)
-        layout.add_widget(back_button)
+        layout.add_widget(login_button)
+        layout.add_widget(home_button)
 
         self.add_widget(layout)
 
@@ -79,3 +81,6 @@ class RegisterScreen(Screen):
 
     def go_to_login(self, instance):
         self.manager.current = 'login'
+
+    def go_to_home(self, instance):
+        self.manager.current = 'home'
