@@ -45,7 +45,7 @@ class RegisterScreen(Screen):
         pixels = texture.pixels
 
         if pixels is None:
-            print("No se pudo capturar la imagen: pixels es None")
+            print("No se pudo capturar la imagen: pixels es Nones")
             return
 
         try:
