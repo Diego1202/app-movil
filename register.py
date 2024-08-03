@@ -5,7 +5,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.camera import Camera
 from kivy.graphics.texture import Texture
-import base64
+import face_recognition
+import numpy as np
 from PIL import Image as PILImage
 from io import BytesIO
 from database import save_user
@@ -48,16 +49,23 @@ class RegisterScreen(Screen):
             return
 
         try:
+            # Convert texture to PIL Image
             image = PILImage.frombytes(mode='RGBA', size=size, data=pixels)
+            image = image.convert('RGB')  # Convert to RGB
         except Exception as e:
             print(f"Error al convertir datos de la cámara a imagen: {e}")
             return
 
-        buffered = BytesIO()
-        image.save(buffered, format="PNG")
-        self.face_data = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        # Convert PIL Image to numpy array
+        image_np = np.array(image)
 
-        print("Face captured successfully")
+        # Encode face
+        face_encodings = face_recognition.face_encodings(image_np)
+        if face_encodings:
+            self.face_data = face_encodings[0].tobytes()  # Convert to bytes
+            print("Face captured successfully")
+        else:
+            print("No face detected")
 
     def register(self, instance):
         username = self.username.text
