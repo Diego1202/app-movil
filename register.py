@@ -1,14 +1,13 @@
+import base64
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.camera import Camera
-from kivy.graphics.texture import Texture
 import face_recognition
 import numpy as np
 from PIL import Image as PILImage
-from io import BytesIO
 from database import save_user
 
 class RegisterScreen(Screen):
@@ -45,7 +44,7 @@ class RegisterScreen(Screen):
         pixels = texture.pixels
 
         if pixels is None:
-            print("No se pudo capturar la imagen: pixels es Nones")
+            print("No se pudo capturar la imagen: pixels es None")
             return
 
         try:
@@ -71,7 +70,8 @@ class RegisterScreen(Screen):
         username = self.username.text
         password = self.password.text
         if username and password and hasattr(self, 'face_data'):
-            save_user(username, password, self.face_data)
+            face_data_base64 = base64.b64encode(self.face_data).decode('utf-8')
+            save_user(username, password, face_data_base64)
             print("User registered successfully")
             self.manager.current = 'login'
         else:

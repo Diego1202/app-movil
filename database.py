@@ -6,7 +6,7 @@ def create_db():
     cursor.execute('''CREATE TABLE IF NOT EXISTS users
                       (username TEXT PRIMARY KEY,
                        password TEXT,
-                       face_data BLOB)''')
+                       face_data TEXT)''')
     conn.commit()
     conn.close()
 
@@ -16,7 +16,7 @@ def save_user(username, password, face_encoding):
 
     cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
     if cursor.fetchone() is not None:
-        print("Error: El nombre de usuario ya está en uso.")
+        print("Error: El nombre de usuario ya esta en uso")
         conn.close()
         return
     
@@ -25,10 +25,13 @@ def save_user(username, password, face_encoding):
     conn.commit()
     conn.close()
 
-def get_user_data(username):
+def get_user(username):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('SELECT username, password, face_data FROM users WHERE username = ?', (username,))
-    row = cursor.fetchone()
+    user_data = cursor.fetchone()
     conn.close()
-    return row
+    return user_data
+
+
+
