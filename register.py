@@ -69,5 +69,5 @@ class RegisterScreen(Screen):
         else:
             print("Username, password, and face capture are required")
 
-    #def go_to_login(self, instance):
-        #self.manager.current = 'login'
+    def go_to_login(self, instance):
+        self.manager.current = 'login'
