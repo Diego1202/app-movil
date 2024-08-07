@@ -8,6 +8,7 @@ def create_db():
     cursor.execute('''CREATE TABLE IF NOT EXISTS users
                       (username TEXT PRIMARY KEY,
                        password TEXT,
+                       finger_data TEXT,
                        face_data TEXT)''')
     
     # Crear la tabla de archivos relacionados con los usuarios
