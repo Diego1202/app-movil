@@ -7,65 +7,59 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.popup import Popup
-from kivy.uix.recycleview import RecycleView
-from kivy.uix.recycleview.views import RecycleDataViewBehavior
-
-class FileEntry(RecycleDataViewBehavior, BoxLayout):
-    """Clase para mostrar la entrada de archivo en la tabla."""
-    
-    def __init__(self, delete_callback, **kwargs):
-        super(FileEntry, self).__init__(**kwargs)
-
-        # Layout para la entrada de archivo
-        layout = BoxLayout(size_hint_y=None, height=40)
-
-        # Etiqueta para mostrar la ruta del archivo
-        self.file_label = Label(size_hint_x=0.8)
-        layout.add_widget(self.file_label)
-
-        # Botón para eliminar el archivo
-        delete_button = Button(text='Delete', size_hint_x=0.2)
-        delete_button.bind(on_release=self.delete_file)
-        layout.add_widget(delete_button)
-
-        self.add_widget(layout)
-
-        self.delete_callback = delete_callback  # Callback para eliminar archivos
-
-    def delete_file(self, instance):
-        file_path = self.file_label.text  # Obtener la ruta del archivo desde la etiqueta
-        self.delete_callback(file_path)  # Llamar al callback para eliminar el archivo
-
-class FileListView(RecycleView):
-    """Clase que representa la lista de archivos subidos."""
-    def __init__(self, delete_callback, **kwargs):
-        super(FileListView, self).__init__(**kwargs)
-        self.data = []
-        self.viewclass = FileEntry  # Establece la clase que se usará para las entradas
-        self.delete_callback = delete_callback  # Callback para eliminar archivos
-
-    def update_files(self, files):
-        self.data = [{'file_label': file} for file in files]  # Actualiza los datos para mostrar la ruta del archivo
-        self.refresh_from_data()  # Refresca la vista para mostrar los nuevos datos
+from kivymd.uix.datatables import MDDataTable
+from kivy.metrics import dp
+from util import Alerts
 
 class HomeScreen(Screen):
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical')
-
-        self.username = ''
-        self.welcome_label = Label()
+        self.alerts = Alerts()
+        self.username = []
+        self.ror_actual = ''
+        self.welcome_label = Label(
+            font_size='24sp',  # Tamaño de fuente
+            color=(0, 0, 0, 1),  # Color negro (r, g, b, a)
+            size_hint_y=None,  # No ajustar automáticamente la altura
+            height=50,  # Altura de la etiqueta
+            valign='top',  # Alineación vertical
+        )
         layout.add_widget(self.welcome_label)
 
+        # Tabla de datos usando MDDataTable
+        self.data_tables = MDDataTable(
+            size_hint=(1, 0.6),
+            check=True,
+            column_data=[
+                ("ID", dp(20)),  # Asegúrate de que la primera columna es el ID
+                ("File Path", dp(60)),
+                ("Actions", dp(20))
+            ],
+            row_data=[],
+        )
+        self.data_tables.bind(on_check_press=self.on_check_press)
+        layout.add_widget(self.data_tables)
+
+
+        # Botón de eliminar
+        self.delete_button = Button(
+            text='Delete',
+            size_hint=(1, 0.2),
+            on_release=self.delete_selected_files
+        )
+        self.delete_button.opacity = 0
+        self.delete_button.disabled = True
+        layout.add_widget(self.delete_button)
+
         # Botón para abrir el explorador de archivos
-        select_file_button = Button(text='Select File', on_release=self.open_file_chooser)
+        select_file_button = Button(text='Select File', size_hint=(1, 0.2), on_release=self.open_file_chooser)
         layout.add_widget(select_file_button)
 
-        # RecycleView para mostrar los archivos
-        self.file_list_view = FileListView(delete_callback=self.delete_file)
-        layout.add_widget(self.file_list_view)
-
         self.add_widget(layout)
+
+    def on_start(self):
+        self.data_tables.open()
 
     def set_username(self, username):
         self.welcome_label.text = f"Welcome, {username}!"
@@ -99,7 +93,7 @@ class HomeScreen(Screen):
             selected_file = selected[0]
             self.store_file(selected_file)
         else:
-            self.show_popup("Error", "No file selected.")
+            self.alerts.show_message("Error", "No file selected.")
 
     def store_file(self, selected_file):
         # Crear la ruta de la carpeta del usuario
@@ -122,7 +116,7 @@ class HomeScreen(Screen):
         self.load_user_files()  # Actualiza los archivos del usuario después de almacenar el nuevo archivo
 
         # Mostrar un mensaje y cerrar el popup
-        self.show_popup("File Uploaded", f"The file has been uploaded to: {destination}")
+        self.alerts.show_message("File Uploaded", f"The file has been uploaded to: {destination}")
         self.popup.dismiss()
 
     def save_file_to_db(self, file_path):
@@ -135,37 +129,56 @@ class HomeScreen(Screen):
     def load_user_files(self):
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
-        cursor.execute('SELECT file_path FROM files WHERE username=?', (self.username,))
+        cursor.execute('SELECT id, file_path FROM files WHERE username=?', (self.username,))
         files = cursor.fetchall()
         conn.close()
 
-        # Extraer solo las rutas de archivo
-        file_paths = [file[0] for file in files]
+        # Extraer los IDs y las rutas de archivo
+        file_ids = [file[0] for file in files]
+        file_paths = [file[1] for file in files]
 
         # Actualizar la vista de archivos
-        self.file_list_view.update_files(file_paths)
-
+        self.data_tables.row_data = [(identi, file_path, "Delete") for identi, file_path in zip(file_ids, file_paths)]
+        
         # Si no hay archivos, mostrar un mensaje
         if not file_paths:
-            self.show_popup("No Files", "No files have been uploaded by this user.")
+            self.alerts.show_message("No Files", "No files have been uploaded by this user.")
+    
+    def on_check_press(self, instance_table, current_row):
+        '''Called when the check box in the table row is checked.'''
 
-    def delete_file(self, file_path):
-        # Eliminar el archivo del sistema de archivos
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        # Si hay filas seleccionadas, mostrar el botón de eliminar
+        if current_row:
+            self.ror_actual = current_row
+            self.delete_button.opacity = 1
+            self.delete_button.disabled = False
+        else:
+            self.delete_button.opacity = 0
+            self.delete_button.disabled = True
 
-        # Eliminar el archivo de la base de datos
-        conn = sqlite3.connect('users.db')
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM files WHERE file_path=?', (file_path,))
-        conn.commit()
-        conn.close()
+
+    def delete_selected_files(self, instance):
+
+        if self.ror_actual:
+            file_id = self.ror_actual[0]
+            file_path = self.ror_actual[1]
+
+            # # Eliminar el archivo del sistema de archivos
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+            # # Eliminar el archivo de la base de datos
+            conn = sqlite3.connect('users.db')
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM files WHERE id=?', (file_id,))
+            conn.commit()
+            conn.close()
 
         # Volver a cargar los archivos del usuario
         self.load_user_files()
 
-        self.show_popup("File Deleted", f"The file has been deleted: {file_path}")
+        # # Ocultar el botón de eliminar después de eliminar los archivos
+        self.delete_button.opacity = 0
+        self.delete_button.disabled = True
 
-    def show_popup(self, title, message):
-        popup = Popup(title=title, content=Label(text=message), size_hint=(0.8, 0.3))
-        popup.open()
+        self.alerts.show_message("Files Deleted", "The selected files have been deleted.")

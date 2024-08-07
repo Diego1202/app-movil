@@ -20,12 +20,17 @@ class RegisterScreen(Screen):
 
         # Initialize camera
         self.camera = Camera(play=True, resolution=(640, 480))
-        home_button = Button(text='Regresar', on_release=self.go_to_home)
-        self.capture_button = Button(text='Capture Face', on_release=self.capture_face)
-        register_button = Button(text='Create Account', on_release=self.register)
-        login_button = Button(text='Back to Login', on_release=self.go_to_login)
+        home_button = Button(text='Regresar', size_hint=(1, 0.3), on_release=self.go_to_home)
+        self.capture_button = Button(text='Capture Face', size_hint=(1, 0.3), on_release=self.capture_face)
+        register_button = Button(text='Create Account', size_hint=(1, 0.3), on_release=self.register)
+        login_button = Button(text='Back to Login', size_hint=(1, 0.3), on_release=self.go_to_login)
 
-        layout.add_widget(Label(text='Register your user'))
+        layout.add_widget(Label(text='Register your user', font_size='24sp',  # Tamaño de fuente
+            color=(0, 0, 0, 1),  # Color negro (r, g, b, a)
+            size_hint_y=None,  # No ajustar automáticamente la altura
+            height=50,  # Altura de la etiqueta
+            valign='top',  # Alineación vertical
+            ))
         layout.add_widget(self.username)
         layout.add_widget(self.password)
         layout.add_widget(self.camera)

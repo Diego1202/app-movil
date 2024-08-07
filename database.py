@@ -46,7 +46,7 @@ def get_user(username):
 def get_users():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT face_data FROM users')
+    cursor.execute('SELECT face_data, username FROM users')
     user_data = cursor.fetchall()
     conn.close()
     return user_data

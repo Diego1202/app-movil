@@ -1,4 +1,4 @@
-from kivy.app import App
+from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 from register import RegisterScreen
 from login import LoginScreen
@@ -6,8 +6,9 @@ from auth import AuthScreen
 from database import create_db
 from face import LoginCameraScreen
 from Home import HomeScreen
+# from Huella import RegHuellaScreen
 
-class MyApp(App):
+class MyApp(MDApp):  # Inherit from MDApp
     def build(self):
         create_db()
         sm = ScreenManager()
@@ -16,6 +17,7 @@ class MyApp(App):
         sm.add_widget(RegisterScreen(name='register'))
         sm.add_widget(LoginScreen(name='login'))
         sm.add_widget(HomeScreen(name='welcome'))
+        # sm.add_widget(RegHuellaScreen(name='regHuella'))
         return sm
 
 if __name__ == '__main__':

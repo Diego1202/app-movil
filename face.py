@@ -18,10 +18,14 @@ class LoginCameraScreen(Screen):
         self.alerts = Alerts()
 
         self.camera = Camera(play=True, resolution=(640, 480))
-        self.capture_button = Button(text='Capture Face', on_release=self.capture_face)
-        back_button = Button(text='Regresar', on_release=self.go_to_home)
-        print("L O G I N  F A C E")
-        layout.add_widget(Label(text='Login'))
+        self.capture_button = Button(text='Capture Face',size_hint=(1, 0.3), on_release=self.capture_face)
+        back_button = Button(text='Regresar', size_hint=(1, 0.3), on_release=self.go_to_home)
+        layout.add_widget(Label(text='Login', font_size='24sp',  # Tamaño de fuente
+            color=(0, 0, 0, 1),  # Color negro (r, g, b, a)
+            size_hint_y=None,  # No ajustar automáticamente la altura
+            height=50,  # Altura de la etiqueta
+            valign='top',  # Alineación vertical
+            ))
         layout.add_widget(self.camera)
         layout.add_widget(self.capture_button)
         layout.add_widget(back_button)
@@ -60,14 +64,16 @@ class LoginCameraScreen(Screen):
             if user_data:
                 try:
                     for user in user_data:
-                        stored_face_data = base64.b64decode(user)  # Cambiar a posición correcta
+                        print(user[1])
+                        stored_face_data = base64.b64decode(user[0])  # Cambiar a posición correcta
                         current_face_encoding = np.frombuffer(self.face_data, dtype=np.float64)
                         stored_face_encoding = np.frombuffer(stored_face_data, dtype=np.float64)
 
                         matches = face_recognition.compare_faces([stored_face_encoding], current_face_encoding)
                         if matches[0]:
+                            self.manager.get_screen('welcome').set_username(user[1])
+                            self.manager.current = 'welcome' 
 
-                            self.alerts.show_message("Succefull", f"Bienvenido {user}")
                             break
                             # Aquí deberías cambiar a la pantalla de inicio o la pantalla deseada
                         else:

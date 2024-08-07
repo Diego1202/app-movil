@@ -10,10 +10,12 @@ class AuthScreen(Screen):
         camera_button = Button(text='Login Camera', on_release=self.go_to_camera)
         register_button = Button(text='Register', on_release=self.go_to_register)
         login_button = Button(text='Login', on_release=self.go_to_login)
+        # huella_button = Button(text='Login', on_release=self.go_to_huella)
 
         layout.add_widget(register_button)
         layout.add_widget(camera_button)
         layout.add_widget(login_button)
+        # layout.add_widget(huella_button)
 
         self.add_widget(layout)
 
@@ -25,3 +27,6 @@ class AuthScreen(Screen):
 
     def go_to_camera(self, instance):
         self.manager.current = 'camera'
+
+    # def go_to_huella(self, instance):
+    #     self.manager.current = 'huella'
